@@ -116,7 +116,9 @@
     "size": "Size",
     "schedule": "Schedule",
     "scheduleMessage": "Pick a date and time to schedule the publication of this post.",
-    "newArchetype": "Create a new post based on an archetype. Your file will be created on content folder."
+    "newArchetype": "Create a new post based on an archetype. Your file will be created on content folder.",
+    "upload": "Upload",
+    "uploadMessage": "Select an option to upload."
   },
   "settings": {
     "themes": {
@@ -177,7 +179,7 @@
     "userDefaults": "User default settings",
     "defaultUserDescription": "This are the default settings for new users.",
     "executeOnShell": "Execute on shell",
-    "executeOnShellDescription": "By default, File Browser executes the commands by calling their binaries directly. If you want to run them on a shell instead (such as Bash or PowerShell), you can define it here with the  required arguments and flags. If set, the command you execute will be appended as an argument. This apply to both user commands and event hooks.",
+    "executeOnShellDescription": "By default, File Browser executes the commands by calling their binaries directly. If you want to run them on a shell instead (such as Bash or PowerShell), you can define it here with the required arguments and flags. If set, the command you execute will be appended as an argument. This apply to both user commands and event hooks.",
     "perm": {
       "create": "Create files and directories",
       "delete": "Delete files and directories",

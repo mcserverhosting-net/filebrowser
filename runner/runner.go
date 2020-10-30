@@ -13,6 +13,7 @@ import (
 
 // Runner is a commands runner.
 type Runner struct {
+	Enabled bool
 	*settings.Settings
 }
 
@@ -21,11 +22,13 @@ func (r *Runner) RunHook(fn func() error, evt, path, dst string, user *users.Use
 	path = user.FullPath(path)
 	dst = user.FullPath(dst)
 
-	if val, ok := r.Commands["before_"+evt]; ok {
-		for _, command := range val {
-			err := r.exec(command, "before_"+evt, path, dst, user)
-			if err != nil {
-				return err
+	if r.Enabled {
+		if val, ok := r.Commands["before_"+evt]; ok {
+			for _, command := range val {
+				err := r.exec(command, "before_"+evt, path, dst, user)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -35,11 +38,13 @@ func (r *Runner) RunHook(fn func() error, evt, path, dst string, user *users.Use
 		return err
 	}
 
-	if val, ok := r.Commands["after_"+evt]; ok {
-		for _, command := range val {
-			err := r.exec(command, "after_"+evt, path, dst, user)
-			if err != nil {
-				return err
+	if r.Enabled {
+		if val, ok := r.Commands["after_"+evt]; ok {
+			for _, command := range val {
+				err := r.exec(command, "after_"+evt, path, dst, user)
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
@@ -60,9 +65,9 @@ func (r *Runner) exec(raw, evt, path, dst string, user *users.User) error {
 		return err
 	}
 
-	cmd := exec.Command(command[0], command[1:]...)
+	cmd := exec.Command(command[0], command[1:]...) //nolint:gosec
 	cmd.Env = append(os.Environ(), fmt.Sprintf("FILE=%s", path))
-	cmd.Env = append(cmd.Env, fmt.Sprintf("SCOPE=%s", user.Scope))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("SCOPE=%s", user.Scope)) //nolint:gocritic
 	cmd.Env = append(cmd.Env, fmt.Sprintf("TRIGGER=%s", evt))
 	cmd.Env = append(cmd.Env, fmt.Sprintf("USERNAME=%s", user.Username))
 	cmd.Env = append(cmd.Env, fmt.Sprintf("DESTINATION=%s", dst))

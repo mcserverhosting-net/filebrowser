@@ -1,5 +1,5 @@
 <template>
-  <header>
+  <header v-if="!isEditor && !isPreview">
     <div>
       <button @click="openSidebar" :aria-label="$t('buttons.toggleSidebar')" :title="$t('buttons.toggleSidebar')" class="action">
         <i class="material-icons">menu</i>
@@ -11,10 +11,6 @@
       <template v-if="isLogged">
         <button @click="openSearch" :aria-label="$t('buttons.search')" :title="$t('buttons.search')" class="search-button action">
           <i class="material-icons">search</i>
-        </button>
-
-        <button v-show="showSaveButton" :aria-label="$t('buttons.save')" :title="$t('buttons.save')" class="action" id="save-button">
-          <i class="material-icons">save</i>
         </button>
 
         <button @click="openMore" id="more" :aria-label="$t('buttons.more')" :title="$t('buttons.more')" class="action">
@@ -41,7 +37,7 @@
             <delete-button v-show="showDeleteButton"></delete-button>
           </div>
 
-          <shell-button v-show="user.perm.execute" />
+          <shell-button v-if="isExecEnabled && user.perm.execute" />
           <switch-button v-show="isListing"></switch-button>
           <download-button v-show="showDownloadButton"></download-button>
           <upload-button v-show="showUpload"></upload-button>
@@ -72,7 +68,7 @@ import CopyButton from './buttons/Copy'
 import ShareButton from './buttons/Share'
 import ShellButton from './buttons/Shell'
 import {mapGetters, mapState} from 'vuex'
-import { logoURL } from '@/utils/constants'
+import { logoURL, enableExec } from '@/utils/constants'
 import * as api from '@/api'
 import buttons from '@/utils/buttons'
 
@@ -112,6 +108,7 @@ export default {
       'selectedCount',
       'isFiles',
       'isEditor',
+      'isPreview',
       'isListing',
       'isLogged'
     ]),
@@ -123,14 +120,12 @@ export default {
       'multiple'
     ]),
     logoURL: () => logoURL,
+    isExecEnabled: () => enableExec,
     isMobile () {
       return this.width <= 736
     },
     showUpload () {
       return this.isListing && this.user.perm.create
-    },
-    showSaveButton () {
-      return this.isEditor && this.user.perm.modify
     },
     showDownloadButton () {
       return this.isFiles && this.user.perm.download

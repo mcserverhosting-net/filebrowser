@@ -43,7 +43,7 @@ async function resourceAction (url, method, content) {
   const res = await fetchURL(`/api/resources${url}`, opts)
 
   if (res.status !== 200) {
-    throw new Error(res.responseText)
+    throw new Error(await res.text())
   } else {
     return res
   }
@@ -85,6 +85,11 @@ export function download (format, ...files) {
 export async function post (url, content = '', overwrite = false, onupload) {
   url = removePrefix(url)
 
+  let bufferContent
+  if (content instanceof Blob && !['http:', 'https:'].includes(window.location.protocol)) {
+    bufferContent = await new Response(content).arrayBuffer()
+  }
+
   return new Promise((resolve, reject) => {
     let request = new XMLHttpRequest()
     request.open('POST', `${baseURL}/api/resources${url}?override=${overwrite}`, true)
@@ -93,9 +98,6 @@ export async function post (url, content = '', overwrite = false, onupload) {
     if (typeof onupload === 'function') {
       request.upload.onprogress = onupload
     }
-
-    // Send a message to user before closing the tab during file upload
-    window.onbeforeunload = () => "Files are being uploaded."
 
     request.onload = () => {
       if (request.status === 200) {
@@ -111,30 +113,29 @@ export async function post (url, content = '', overwrite = false, onupload) {
       reject(error)
     }
 
-    request.send(content)
-    // Upload is done no more message before closing the tab 
-  }).finally(() => { window.onbeforeunload = null })
+    request.send(bufferContent || content)
+  })
 }
 
-function moveCopy (items, copy = false) {
+function moveCopy (items, copy = false, overwrite = false, rename = false) {
   let promises = []
 
   for (let item of items) {
     const from = removePrefix(item.from)
     const to = encodeURIComponent(removePrefix(item.to))
-    const url = `${from}?action=${copy ? 'copy' : 'rename'}&destination=${to}`
+    const url = `${from}?action=${copy ? 'copy' : 'rename'}&destination=${to}&override=${overwrite}&rename=${rename}`
     promises.push(resourceAction(url, 'PATCH'))
   }
 
   return Promise.all(promises)
 }
 
-export function move (items) {
-  return moveCopy(items)
+export function move (items, overwrite = false, rename = false) {
+  return moveCopy(items, false, overwrite, rename)
 }
 
-export function copy (items) {
-  return moveCopy(items, true)
+export function copy (items, overwrite = false, rename = false) {
+  return moveCopy(items, true, overwrite, rename)
 }
 
 export async function checksum (url, algo) {

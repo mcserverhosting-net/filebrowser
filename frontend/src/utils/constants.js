@@ -6,11 +6,14 @@ const recaptcha = window.FileBrowser.ReCaptcha
 const recaptchaKey = window.FileBrowser.ReCaptchaKey
 const signup = window.FileBrowser.Signup
 const version = window.FileBrowser.Version
-const logoURL = `/${staticURL}/img/logo.svg`
+const logoURL = `${staticURL}/img/logo.svg`
 const noAuth = window.FileBrowser.NoAuth
 const authMethod = window.FileBrowser.AuthMethod
 const loginPage = window.FileBrowser.LoginPage
 const theme = window.FileBrowser.Theme
+const enableThumbs = window.FileBrowser.EnableThumbs
+const resizePreview = window.FileBrowser.ResizePreview
+const enableExec = window.FileBrowser.EnableExec
 
 export {
   name,
@@ -24,5 +27,8 @@ export {
   noAuth,
   authMethod,
   loginPage,
-  theme
+  theme,
+  enableThumbs,
+  resizePreview,
+  enableExec
 }

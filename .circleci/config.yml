@@ -2,10 +2,10 @@ version: 2
 jobs:
   lint:
     docker:
-      - image: golangci/golangci-lint:v1.16
+      - image: golangci/golangci-lint:v1.27.0
     steps:
       - checkout
-      - run: golangci-lint run -v -D errcheck
+      - run: golangci-lint run -v
   build-node:
     docker:
       - image: circleci/node
@@ -21,9 +21,17 @@ jobs:
           root: .
           paths:
             - '*'
+  test:
+    docker:
+      - image: circleci/golang:1.15.2
+    steps:
+      - checkout
+      - run:
+          name: "Test"
+          command: go test ./...
   build-go:
     docker:
-      - image: circleci/golang:1.12
+      - image: circleci/golang:1.15.2
     steps:
       - attach_workspace:
           at: '~/project'
@@ -41,12 +49,12 @@ jobs:
             - '*'
   release:
     docker:
-      - image: circleci/golang:1.12
+      - image: circleci/golang:1.15.2
     steps:
       - attach_workspace:
           at: '~/project'
       - setup_remote_docker
-      - run: docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+      - run: echo $DOCKER_PASSWORD | docker login --username $DOCKER_USERNAME --password-stdin
       - run: curl -sL https://git.io/goreleaser | bash
       - run: docker logout
 workflows:
@@ -54,6 +62,10 @@ workflows:
   build-workflow:
     jobs:
       - lint:
+          filters:
+            tags:
+              only: /.*/
+      - test:
           filters:
             tags:
               only: /.*/
@@ -68,6 +80,7 @@ workflows:
           requires:
             - build-node
             - lint
+            - test
       - release:
           context: deploy
           requires:
